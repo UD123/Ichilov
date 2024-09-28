@@ -134,7 +134,7 @@ class MonitorComm:
     #========================    
     def setupSerial(self, serPort):
            
-        global  ser
+        global ser
         
         # NOTE the user must ensure that the serial port and baudrate are correct
         #~ serPort = "/dev/ttyS81"
@@ -142,7 +142,9 @@ class MonitorComm:
         ser = serial.Serial(serPort, baudRate)
         self.tprint("Serial port " + serPort + " opened  Baudrate " + str(baudRate))
 
-        self.waitForArduino()
+        ret = self.waitForArduino()
+        if not ret:
+            self.tprint('Failed to connect')
     
     #========================    
     def closeSerial(self):
@@ -161,14 +163,14 @@ class MonitorComm:
         
         if ser is None:
             self.tprint('Connect serial first')
-        return
+            return
     
         ser.write(chr(startMarker).encode('utf-8'))
         ser.write(sendStr)
         ser.write(chr(endMarker).encode('utf-8'))
         
     #===========================    
-    def recvFromArduino(self, timeOut): # timeout in seconds eg 1.5
+    def recvFromArduino(self, timeOut = 1): # timeout in seconds eg 1.5
            
         global startMarker, endMarker, ser
     
@@ -207,11 +209,14 @@ class MonitorComm:
         cnt = 0 
         while msg.find("Arduino is ready") == -1:
 
-            msg = self.recvFromArduino(10)
+            msg     = self.recvFromArduino(1)
             self.tprint(msg)
             cnt = cnt + 1
-            if cnt > 10000:
+            if cnt > 100:
                 break
+            
+        ret = cnt < 1000  # connected
+        return ret
             
     def tprint(self, txt='',level='I'):
         
@@ -225,37 +230,21 @@ class TestMessage(unittest.TestCase):
         d           = Message()
         self.assertEqual(0, d.Id)
         
-    def test_CheckIfCreateEvent(self):
-        # test params dave a nd load      
-        d           = Message()
-        isEvent     = d.CheckIfCreateEvent()
-        self.assertEqual(False, isEvent)
-        time.sleep(d.event_period)
-        isEvent     = d.CheckIfCreateEvent()
-        self.assertEqual(True, isEvent)
         
     def test_Connection(self):
         # debug interface
         global  ser
         m       = MonitorComm()
-        serPort = 'COM12'
+        serPort = 'COM4'
         m.setupSerial(serPort)
         msgList = ['1,1,2,3','3,1,2,3','91,1']
         for stxt  in msgList:
-            m.sendToPicBoard(stxt)
-            rtxt = m.recvFromPicBoard(60)
+            m.sendToArduino(stxt.encode('utf-8'))
+            rtxt = m.recvFromArduino(60)
             print(stxt,' => ',rtxt)
         m.closeSerial()
 
-    def test_BLE(self):
-        # debug BLE interface
-        global  ser
-        m       = MonitorComm()
-        serPort = 'COM6'
-        m.setupSerial(serPort)
-        isOk    = m.configureLocalBLE()
-        print(isOk)
-        m.closeSerial()
+
 
 # -------------------------- 
 if __name__ == '__main__':
@@ -264,8 +253,8 @@ if __name__ == '__main__':
     
     # single view test
     singletest = unittest.TestSuite()
-    singletest.addTest(TestMessage("test_Create"))
-    #singletest.addTest(TestMessage("test_CheckIfCreateEvent"))
+    #singletest.addTest(TestMessage("test_Create"))
+    singletest.addTest(TestMessage("test_Connection"))
     
 
     

@@ -207,9 +207,9 @@ void loop() {
   //newDataFromPC = true;
   //delay(1000);
 
-  checkTimeout();
+  //checkTimeout();
   //switchLEDs();
-  writeOutputs();
+  //writeOutputs();
   //moveServo();
   readAccel();
   //readRawECG();
@@ -251,12 +251,13 @@ void readAccel(){
   YValue = rawAccel.YAxis;
   ZValue = rawAccel.ZAxis;
   
+  /*
   // Display the results (acceleration is measured in m/s^2)
   Serial.print("X: \t"); Serial.print(XValue); Serial.print("\t");
   Serial.print("Y: \t"); Serial.print(YValue); Serial.print("\t");
   Serial.print("Z: \t"); Serial.print(ZValue); Serial.print("\t");
   Serial.println("m/s^2");
-
+   */
 }
 
 
@@ -308,7 +309,6 @@ void algoRun(){
 
 }
 
-
 //============= COMM ====================
 void getMsgFromPC() {
 
@@ -353,7 +353,7 @@ void parseRecvMsg() {
   strtokIndx = strtok(inputBuffer,","); // msgId
   msgId      = atoi(strtokIndx); //  convert to an integer
 
-  strtokIndx = strtok(NULL,","); // msgId
+  strtokIndx = strtok(NULL,","); // msgType
   msgType    = atoi(strtokIndx); //  convert to an integer
 
   strtokIndx = strtok(NULL,","); // msgCount

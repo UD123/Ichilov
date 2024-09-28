@@ -161,7 +161,7 @@ class MonitorGUI:
         # Board
         boardmenu = tk.Menu(menu,tearoff = 0 )
         menu.add_cascade(label='Board',  menu=boardmenu)
-        boardmenu.add_command(label='Connect...',                   command=lambda:self.radioPress)
+        boardmenu.add_command(label='Connect...',                   command= self.radioPress)
         boardmenu.add_separator()    
         boardmenu.add_command(label='Serial List ports...',         command= self.listPorts)
         boardmenu.add_command(label='Serial Connect...',            command= self.commConnect)       
