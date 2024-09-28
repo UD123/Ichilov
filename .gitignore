@@ -13,3 +13,4 @@ Board/ArduinoMain-Accel/ADXL362.h
 
 Board/ArduinoMain-File/*
 Board/ArduinoMain-File/ADXL362.cpp
+/Tests
