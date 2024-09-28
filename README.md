@@ -40,9 +40,11 @@ The following information is required:
 
     \Envs\pyqt\Scripts\activate.bat
 
-4. Install serial and numpy:
+4. Install serial and matplotlib:
 
     pip install serial
+
+    pip install matplotlib
 
 
 # Special thanks
