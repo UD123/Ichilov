@@ -1,3 +1,6 @@
+![](Doc/GUI.png)
+
+
 # Python, Arduino and mcCube Accelerometer
 Basic implementation of the Accelerometer MC3565 interface
 and python GUI that can receive and display the data in real time
