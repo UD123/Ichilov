@@ -1,12 +1,12 @@
 ![](Doc/GUI.png)
 
 
-# Python, Arduino and mcCube Accelerometer
-Basic implementation of the Accelerometer MC3565 interface
+# Python, Arduino and mCube Accelerometer (EV3635)
+Basic implementation of the Accelerometer MC3565 interface to Arduino
 and python GUI that can receive and display the data in real time from Arduino board.
 
 # Arduino Uno and mCube (MC3635) SPI Connection
-Make sure to connect evaluation board of MC3635 in the following way:
+Make sure to connect evaluation board EV3635 of MC3635 in the following way:
 
 ![](Doc/Connection.png)
 
@@ -22,8 +22,10 @@ POWER          |  3.3V         | DVDD 9
 GND            | GND           | GND 8
 
 # Folder structure
+The following information is required:
 
-
+- Board : contains Arduino modules and communication interface
+- PC    : Contains GUI and Communication wrapper that sends string messages to and from Arduino using COM interface.
 
 # Installation on Windows
 
