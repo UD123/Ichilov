@@ -3,10 +3,14 @@
 
 # Python, Arduino and mcCube Accelerometer
 Basic implementation of the Accelerometer MC3565 interface
-and python GUI that can receive and display the data in real time
+and python GUI that can receive and display the data in real time from Arduino board.
 
 # Arduino Uno and mCube (MC3635) SPI Connection
-Make sure to connect evaluation board of MC3635 in the following way
+Make sure to connect evaluation board of MC3635 in the following way:
+
+![](Doc/Connection.png)
+
+Connection table:
 
 Name           |  Arduino Uno  | MC3635 
 :------------: |  :----------: | :-------------: 
