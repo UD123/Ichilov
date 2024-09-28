@@ -44,15 +44,6 @@ The following information is required:
 
     pip install serial
 
-5. Instrall PySide6 library (requires also Clang library (C-bindings) see : https://pypi.org/project/PySide6/):
-
-    pip install PySide6
-
-6. Install QtGraph:
-
-    pip install pyqtgraph
-
-
 
 # Special thanks
 The code is based on the library provided by:
@@ -66,5 +57,5 @@ https://github.com/mcubemems/mCube_mc36xx_mcu_driver/tree/master
 
  Ver  | Date         | Who   | Descr
 :---: | :----------: | :---: |:-------------: 
-0105  | 01.12.22     | UD    | Addign Accel
+0201  | 01.09.24     | UD    | Improved Accel
 
