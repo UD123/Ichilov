@@ -43,7 +43,8 @@ import tkinter.ttk as ttk
 #from tkinter import *
 from MonitorComm import MonitorComm
 from MonitorMessage import Message, MESSAGE_TYPE
-import atexit
+#import atexit
+COMM_PORT = 'COM4'
 
 # def exit_handler():
 #     print('My application is ending!')
@@ -93,6 +94,12 @@ class MonitorGUI:
         msgRecv   = self.com.msgSendRecv(msgSend,msgRecv)
         self.tprint('Board version : %04d' %(msgRecv.Data[0]))
 
+    def getSatus(self):
+        # 93 : read status
+        msgSend   = Message(93,[0])
+        msgRecv   = self.new_method()
+        msgRecv   = self.com.msgSendRecv(msgSend,msgRecv)
+        self.tprint('Board stats : %04d' %(msgRecv.Data[0])) 
     def new_method(self):
         msgRecv   = Message(92,MESSAGE_TYPE['ARRAY'],1,[0])
         return msgRecv
@@ -154,24 +161,30 @@ class MonitorGUI:
         # Board
         boardmenu = tk.Menu(menu,tearoff = 0 )
         menu.add_cascade(label='Board',  menu=boardmenu)
-        boardmenu.add_command(label='Connect...',               command=lambda:self.radioPress)
-        boardmenu.add_command(label='Board Info...',            command= self.getVersion)
+        boardmenu.add_command(label='Connect...',                   command=lambda:self.radioPress)
+        boardmenu.add_separator()    
+        boardmenu.add_command(label='Serial List ports...',         command= self.listPorts)
+        boardmenu.add_command(label='Serial Connect...',            command= self.commConnect)       
+        boardmenu.add_command(label='Serial Close...',              command= self.commClose)  
+        boardmenu.add_separator() 
+        boardmenu.add_command(label='Board Version...',             command= self.getVersion)  
+        boardmenu.add_command(label='Board Status...',              command= self.getSatus)
 
         # Sensor
         sensoramenu = tk.Menu(menu,tearoff = 0 )
         menu.add_cascade(label='Sensors',  menu=sensoramenu)
-        sensoramenu.add_command(label='Select from List',        command=lambda:self.CameraList())
+        sensoramenu.add_command(label='Select from List',           command=self.listPorts)
 
         # Tests
         sensoramenu = tk.Menu(menu,tearoff = 0 )
         menu.add_cascade(label='Tests',  menu=sensoramenu)
-        sensoramenu.add_command(label='Set PWN values',           command=self.setPwmValues)
+        sensoramenu.add_command(label='Set PWN values',             command=self.setPwmValues)
         sensoramenu.add_separator()
-        sensoramenu.add_command(label='Get sensor values',     command=self.getSensorValues)
-        sensoramenu.add_command(label='Get accel data',        command=self.getAccelValues)
-        sensoramenu.add_command(label='Get ECG data',          command=self.getEcgRawValues)
+        sensoramenu.add_command(label='Get sensor values',          command=self.getSensorValues)
+        sensoramenu.add_command(label='Get accel data',             command=self.getAccelValues)
+        sensoramenu.add_command(label='Get ECG data',               command=self.getEcgRawValues)
         sensoramenu.add_separator()
-        sensoramenu.add_command(label='Send Recv File',        command=self.setFileData)
+        sensoramenu.add_command(label='Send Recv File',             command=self.setFileData)
         
         # Help
         helpmenu = tk.Menu(menu, tearoff = 0)
@@ -186,7 +199,7 @@ class MonitorGUI:
 
         self.win.minsize(width=520, height=370)
         self.win.config(bg = 'gray')
-        self.win.title("Levron GUI Demo")
+        self.win.title("ICHILOV GUI Demo")
         #self.win.iconbitmap(iconFilePath)
 
         self.masterframe = tk.Frame(bg = "gray")
@@ -209,7 +222,7 @@ class MonitorGUI:
     def plotView(self):
         # https://matplotlib.org/stable/gallery/user_interfaces/embedding_in_tk_sgskip.html
 
-        self.fig  = Figure(figsize=(5, 4), dpi=100)
+        self.fig  = Figure(figsize=(8, 6), dpi=100)
         self.t    = np.arange(0, 3, .01)
         self.y    = 2 * np.sin(2 * np.pi * self.t)
         self.ax   = self.fig.add_subplot()
@@ -218,10 +231,10 @@ class MonitorGUI:
         self.ax.set_ylabel("f(t)")
         
         # Create left and right frames
-        left_frame  =  tk.Frame(self.masterframe,  width=80,  height=400,  bg='black')
+        left_frame  =  tk.Frame(self.masterframe,  width=60,  height=400,  bg='black')
         left_frame.pack(side='left',  fill='both',  padx=10,  pady=5,  expand=True)
 
-        right_frame  =  tk.Frame(self.masterframe,  width=620,  height=400,  bg='black')
+        right_frame  =  tk.Frame(self.masterframe,  width=720,  height=400,  bg='black')
         right_frame.pack(side='right',  fill='both',  padx=10,  pady=5,  expand=True)        
         
         self.canvas= FigureCanvasTkAgg(self.fig, master=right_frame)
@@ -760,11 +773,6 @@ class MonitorGUI:
         msgRecv   = Message(2,MESSAGE_TYPE['ARRAY'],1,[0, 0, 0])
         self.com.msgSendRecv(msgSend,msgRecv)
         
-
-            
-   
-            
-
     def slide(self,sval):
         global ledAstatus, ledBstatus, servoPos
 
@@ -781,22 +789,57 @@ class MonitorGUI:
         #self.mainScreen()
         self.graphicsScreen()
         
+   # ---COMM IF----------
+    def listPorts(self):
+        # list ports
+        res = self.com.listSerialPorts()
+        #self.mainScreen()
+        #self.graphicsScreen()
+        if len(res) > 0:
+            self.autoSelect(res[0])
+
+    def commConnect(self):
+        # Check if the connection exists
+        ret = self.autoSelect(COMM_PORT)
+        #ret = self.com.setupSerial()
+        
+        if ret: #self.checkAlive():
+            self.tprint('Board connection is found ...')
+            return
+        else:
+            self.tprint('Board software is not running or BLE problem ...','E')
+            return
+            
+        #self.graphicsScreen()
+        self.tprint('Waiting to PIC board connection ...')
+        isOk = self.com.waitForPicBoard()
+        if isOk:
+            self.tprint('Connected')
+        else: 
+            self.tprint('PIC Board connection problem. Try reset.','W')
+        
     def autoSelect(self,pname = 'COM5'):
         #global radioVar
+        
         try:
             self.com.setupSerial(pname)
+            ret = True
         except :
             self.tprint('Did you connect the Arduino board?')
+            ret = False
         #self.mainScreen()
         #self.plotView() 
+        return ret
+        
+    def commClose(self):
+        # close port
+        self.com.closeSerial()
         
     def mainQuit(self):
 		# correct way to close
         self.win.quit()     # stops mainloop
         self.win.destroy()  # this is necessary on Windows to prevent
                             # Fatal Python Error: PyEval_RestoreThread: NULL tstate
-
-               
 
     def finish(self):
         self.com.closeSerial()
@@ -805,20 +848,28 @@ class MonitorGUI:
         #self.win.destroy()
         #self.win.quit()
 
-    def tprint(self, txt='',level='I'):
+    def tprint(self, txt='',level='I', showInCmdLine = True):
+        try:
+            self.e.delete(0,tk.END)
+        except:
+            print('Main window is destroyed')
+            return
 
-        #self.e.insert(0,txt)
         if level == 'I':
             ptxt = 'I: GUI: %s' % txt
+            bckg = "White"
         if level == 'W':
             ptxt = 'W: GUI: %s' % txt
+            bckg = "Yellow"
         if level == 'E':
             ptxt = 'E: GUI: %s' % txt
+            bckg = "Red"
+            
+        print(ptxt)    
 
-        #self.e.config({"background": bckg})
-        print(ptxt)
-
-
+        if showInCmdLine:
+            self.e.insert(0,txt)
+            self.e.config({"background": bckg})
 
 
 

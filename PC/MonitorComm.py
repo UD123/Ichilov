@@ -36,8 +36,8 @@ import unittest
 
 # global variables for module
 startMarker = 60  # <
-endMarker = 62    # >
-
+endMarker   = 62    # >
+ser         = None
 
 
 #%%
@@ -234,6 +234,28 @@ class TestMessage(unittest.TestCase):
         isEvent     = d.CheckIfCreateEvent()
         self.assertEqual(True, isEvent)
         
+    def test_Connection(self):
+        # debug interface
+        global  ser
+        m       = MonitorComm()
+        serPort = 'COM12'
+        m.setupSerial(serPort)
+        msgList = ['1,1,2,3','3,1,2,3','91,1']
+        for stxt  in msgList:
+            m.sendToPicBoard(stxt)
+            rtxt = m.recvFromPicBoard(60)
+            print(stxt,' => ',rtxt)
+        m.closeSerial()
+
+    def test_BLE(self):
+        # debug BLE interface
+        global  ser
+        m       = MonitorComm()
+        serPort = 'COM6'
+        m.setupSerial(serPort)
+        isOk    = m.configureLocalBLE()
+        print(isOk)
+        m.closeSerial()
 
 # -------------------------- 
 if __name__ == '__main__':

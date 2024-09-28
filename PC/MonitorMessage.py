@@ -46,9 +46,8 @@ class Message:
         elif self.Type == MESSAGE_TYPE['ARRAY']:
             txt = str(self.Data)
             txt = txt[1:-1]  # remove brackets
-            
         else:
-            raise ValueError 
+            raise ValueError('Bad message type')
             
         return txt   
 
@@ -70,7 +69,7 @@ class Message:
             dout = [float(x) for x in data]
             
         else:
-            raise ValueError             
+            raise ValueError('Bad message type')             
   
         return dout        
         
