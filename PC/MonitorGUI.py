@@ -308,9 +308,9 @@ class MonitorGUI:
 
         self.fig        = Figure(figsize=(10, 6), dpi=100)
         #self.fig.canvas.set_window_title('3D Scene')
-        self.z_data     = np.arange(0, 10, 1)
-        self.y_data     = np.sin(self.z_data)*2 
-        self.x_data     = np.cos(self.z_data)*2 
+        self.z_data     = np.array([0, -1])
+        self.y_data     = (self.z_data)*0 
+        self.x_data     = (self.z_data)*0 
         
 #        self.ax         = self.fig.subplots() #
 #        self.line       = self.ax.plot(self.x_data, self.y_data, self.z_data)
@@ -510,7 +510,10 @@ class MonitorGUI:
         self.y_data    = np.array([0,0])
         self.z_data    = np.array([0,1])
         #self.ax        = self.fig.add_subplot()
-        self.line,      = self.ax.plot(self.x_data, self.y_data,self.z_data)
+
+        self.line,      = self.ax.plot(self.x_data, self.y_data,self.z_data, 'g-o', linewidth=2, markersize=5)
+        self.stam,      = self.ax.plot(0, 0, 0, 'r-o', linewidth=0, markersize=5)
+        
         self.ax.set_xlabel("X")
         self.ax.set_ylabel("Y")
         self.ax.set_zlabel("Z")
@@ -539,7 +542,7 @@ class MonitorGUI:
             # Limit x and y lists to the more recent items 
             xdata       = np.array([0,sens_val[0]])  
             ydata       = np.array([0,sens_val[1]])  
-            zdata       = np.array([0,sens_val[2]])   
+            zdata       = np.array([0,-sens_val[2]])   
                   
             self.line.set_data(xdata, ydata)
             self.line.set_3d_properties(zdata)
@@ -568,7 +571,7 @@ class MonitorGUI:
         else:
             self.btnAcquireStatus = False
             stopThread = True
-            self.btnEcgRaw.config(bg="gray", fg="black", text="Get ECG")
+            self.btnEcgRaw.config(bg="gray", fg="black", text="Get Dir")
             #self.ts.join()
             self.tprint('Thread is stopped')             
 
