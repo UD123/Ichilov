@@ -15,12 +15,8 @@ Install:
 -----------------------------
  Ver    Date     Who    Descr
 -----------------------------
-0201   27.09.24 UD     adopted
-0108   27.12.22 UD     sending and receiving file. Compatible with Arduino 0107
-0107   16.12.22 UD     reading file
-0106   11.12.22 UD     adding ECG MAX30003
-0105   02.12.22 UD     adding Accel
-0101   22.11.22 UD     created
+0301   30.09.24 UD     3D view is added
+0201   27.09.24 UD     adopted Levron
 -----------------------------
 
 """
@@ -161,7 +157,7 @@ class MonitorGUI:
         # Board
         boardmenu = tk.Menu(menu,tearoff = 0 )
         menu.add_cascade(label='Board',  menu=boardmenu)
-        boardmenu.add_command(label='Connect...',                   command= self.radioPress)
+        boardmenu.add_command(label='Connect...',                   command= self.commConnect)
         boardmenu.add_separator()    
         boardmenu.add_command(label='Serial List ports...',         command= self.listPorts)
         boardmenu.add_command(label='Serial Connect...',            command= self.commConnect)       
@@ -210,25 +206,28 @@ class MonitorGUI:
         # add menu
         self.setupMenu()
 
+        # which plot type
+        #self.setupPlot2D()
+        self.setupPlot3D()
+         
+        # select view
+        self.setupScreen()
+        
         # connection to board
         #self.selectPort()
-        self.autoSelect()
+        self.autoSelect()        
         
-        # select view
-        #self.graphicsScreen()
-        #self.createWidgets()
-        self.plotView()
-        
-    def plotView(self):
+    def setupScreen(self):
         # https://matplotlib.org/stable/gallery/user_interfaces/embedding_in_tk_sgskip.html
 
-        self.fig  = Figure(figsize=(8, 6), dpi=100)
-        self.t    = np.arange(0, 3, .01)
-        self.y    = 2 * np.sin(2 * np.pi * self.t)
-        self.ax   = self.fig.add_subplot()
-        self.line, = self.ax.plot(self.t, self.y)
-        self.ax.set_xlabel("time [s]")
-        self.ax.set_ylabel("f(t)")
+        # self.fig  = Figure(figsize=(8, 6), dpi=100)
+        # self.t    = np.arange(0, 3, .01)
+        # self.y    = 2 * np.sin(2 * np.pi * self.t)
+        # self.ax   = self.fig.add_subplot()
+        # self.line, = self.ax.plot(self.t, self.y)
+        # self.ax.set_xlabel("time [s]")
+        # self.ax.set_ylabel("f(t)")
+       
         
         # Create left and right frames
         left_frame  =  tk.Frame(self.masterframe,  width=60,  height=400,  bg='black')
@@ -250,14 +249,14 @@ class MonitorGUI:
         self.canvas.mpl_connect("key_press_event", key_press_handler)
 
         #button_quit = tk.Button(master=left_frame, text="Quit", command=self.win.destroy, relief=tk.RAISED)
-        button_quit = tk.Button(master=left_frame, text="Quit", command=self.finish, relief=tk.RAISED)
-        slider_update = tk.Scale(left_frame, from_=1, to=5, orient=tk.HORIZONTAL, command=self.slide, label="Freq [Hz]")
-        self.btnAcquire = tk.Button(master=left_frame, text="Acquire", command=self.btnAcquirePress, relief=tk.RAISED)
-        self.btnAccel = tk.Button(master=left_frame, text="Get Accel", command=self.btnAccelPress, relief=tk.RAISED)
-        self.btnEcgRaw = tk.Button(master=left_frame, text="Get ECG", command=self.btnEcgRawPress, relief=tk.RAISED)
+        button_quit         = tk.Button(master=left_frame, text="Quit", command=self.finish, relief=tk.RAISED)
+        slider_update       = tk.Scale(left_frame, from_=1, to=5, orient=tk.HORIZONTAL, command=self.slide, label="Freq [Hz]")
+        self.btnAcquire     = tk.Button(master=left_frame, text="Acquire", command=self.btnAcquirePress, relief=tk.RAISED)
+        self.btnAccel       = tk.Button(master=left_frame, text="Get Accel", command=self.btnAccelPress, relief=tk.RAISED)
+        self.btnEcgRaw      = tk.Button(master=left_frame, text="Get Dir", command=self.btnEcgRawPress, relief=tk.RAISED)
         self.btnFileOffLine = tk.Button(master=left_frame, text="File Offline", command=self.btnFileOffLinePress, relief=tk.RAISED)
-        self.btnFileOnLine = tk.Button(master=left_frame, text="File on Board", command=self.btnFileOnLinePress, relief=tk.RAISED)
-        self.e  = tk.Entry(master=right_frame)
+        self.btnFileOnLine  = tk.Button(master=left_frame, text="File on Board", command=self.btnFileOnLinePress, relief=tk.RAISED)
+        self.e              = tk.Entry(master=right_frame)
         
                 
         self.ledAbutton = tk.Button(master=left_frame, text="LedA", fg="white", bg="black", command = self.btnA)
@@ -292,6 +291,53 @@ class MonitorGUI:
         self.x_data = []
         self.y_data = []
         self.btnAcquireStatus = False
+
+    def setupPlot2D(self):
+        # https://matplotlib.org/stable/gallery/user_interfaces/embedding_in_tk_sgskip.html
+
+        self.fig  = Figure(figsize=(8, 6), dpi=100)
+        self.t    = np.arange(0, 3, .01)
+        self.y    = 2 * np.sin(2 * np.pi * self.t)
+        self.ax   = self.fig.add_subplot()
+        self.line, = self.ax.plot(self.t, self.y)
+        self.ax.set_xlabel("time [s]")
+        self.ax.set_ylabel("f(t)")
+
+    def setupPlot3D(self):
+        # https://matplotlib.org/stable/gallery/user_interfaces/embedding_in_tk_sgskip.html
+
+        self.fig        = Figure(figsize=(10, 6), dpi=100)
+        #self.fig.canvas.set_window_title('3D Scene')
+        self.z_data     = np.arange(0, 10, 1)
+        self.y_data     = np.sin(self.z_data)*2 
+        self.x_data     = np.cos(self.z_data)*2 
+        
+#        self.ax         = self.fig.subplots() #
+#        self.line       = self.ax.plot(self.x_data, self.y_data, self.z_data)
+#        
+#        self.ax         = self.fig.add_subplot()
+#        self.line       = self.ax.plot(self.x_data, self.y_data, self.z_data)
+        
+        # matplotlib 3.5.3
+        #self.ax         = self.fig.gca(projection='3d') #self.fig.add_subplot(111) # #self.fig.add_subplot(111)
+        self.ax         = self.fig.add_subplot(projection='3d')
+        self.line,      = self.ax.plot(self.x_data, self.y_data, self.z_data)
+        self.ax.set_xlabel("X [mm]")
+        self.ax.set_ylabel("Y [mm]")
+        self.ax.set_zlabel("Z [mm]")
+        #Axes3D.mouse_init(self.ax)
+        #self.fig.tight_layout()
+        self.ax.xaxis.set_pane_color((0.0, 0.0, 0.0, 0.0))
+        self.ax.yaxis.set_pane_color((0.0, 0.0, 0.0, 0.0))
+        self.ax.zaxis.set_pane_color((0.0, 0.0, 0.0, 0.0))
+        #self.ax.axis('equal')
+        #self.ax.axis("off")
+        #self.ax.view_init(elev=90, azim=0)
+                
+        # run multiple
+        self.x_data = []
+        self.y_data = []    
+        self.z_data = []
 
     def runProgram(self):
         self.win.mainloop()
@@ -366,7 +412,7 @@ class MonitorGUI:
             self.tprint('Thread is stopped')             
        
     # ---------------------------------         
-    # -- Configure --
+    # -- Accel 2D Show Config --
     def setupAccelDataView(self):
         # reconfigure the right pannel for data show
         #for child in self.right_frame.winfo_children():
@@ -429,7 +475,7 @@ class MonitorGUI:
             self.canvas.draw()                         
             time.sleep(0.01)  
       
-    # -- Config --      
+    # -- Control --      
     def btnAccelPress(self):
         # when pressed starts or stops thread
         global stopThread
@@ -452,7 +498,7 @@ class MonitorGUI:
             self.tprint('Thread is stopped')  
             
     # ---------------------------------   
-    # -- Configure -- 
+    # --  Accel 3D Show Configure -- 
     def setupEcgRawDataView(self):
         # reconfigure the right pannel for data show
         #for child in self.right_frame.winfo_children():
@@ -460,14 +506,18 @@ class MonitorGUI:
         
         #self.fig       = Figure(figsize=(5, 4), dpi=100)
         self.ax.clear()
-        self.x_data    = np.arange(0, 3, .1)
-        self.y_data    = np.zeros((len(self.x_data),1))
+        self.x_data    = np.array([0,0])
+        self.y_data    = np.array([0,0])
+        self.z_data    = np.array([0,1])
         #self.ax        = self.fig.add_subplot()
-        self.ax.plot(self.x_data, self.y_data)
-        self.ax.set_xlabel("time [s]")
-        self.ax.set_ylabel("ECG(t)")
-        self.ax.set_ylim(-250, 250)
-        self.ax.legend(['ECG'])
+        self.line,      = self.ax.plot(self.x_data, self.y_data,self.z_data)
+        self.ax.set_xlabel("X")
+        self.ax.set_ylabel("Y")
+        self.ax.set_zlabel("Z")
+        self.ax.set_xlim(-1.2, 1.2)
+        self.ax.set_ylim(-1.2, 1.2)
+        self.ax.set_zlim(-1.2, 1.2)
+        self.ax.legend(['Gravity'])
 
         #self.canvas= FigureCanvasTkAgg(self.fig, master=self.right_frame)
         #self.canvas.get_tk_widget().grid(row=1,column=0) #,rowspan = 4, sticky="NSEW") #,columnspan = 4,rowspan = 4)
@@ -480,32 +530,19 @@ class MonitorGUI:
         while self.btnAcquireStatus:
             #self.tprint('%s' %k)
             # Read temperature
-            sens_val    = self.getEcgRawValues()
+            sens_val    = self.getAccelValues()
             time_now    = time.time() - self.time_start
-
-            # # Add x and y to lists
-            # self.x_data.append(time_now)
-            # self.y_data.append(sens_val[0:3]) # drop temperature
-            #xdata       = self.line.get_xdata()
             
+            sens_val    = np.array(sens_val)
+            sens_val    = sens_val/np.linalg.norm(sens_val)
 
-            # Limit x and y lists to the more recent items
-            size_limit = 30
-            # self.x_data = self.x_data[-size_limit:]
-            # self.y_data = self.y_data[-size_limit:]  
-            xdata       = self.ax.lines[0].get_xdata()
-            xdata[0:-1] = xdata[1:]
-            xdata[-1]   = time_now           
-
-            ydata       = self.ax.lines[0].get_ydata()
-            ydata[0:-1] = ydata[1:]
-            ydata[-1]   = np.array(sens_val)
-            self.ax.lines[0].set_ydata(ydata)
-            self.ax.lines[0].set_xdata(xdata)
+            # Limit x and y lists to the more recent items 
+            xdata       = np.array([0,sens_val[0]])  
+            ydata       = np.array([0,sens_val[1]])  
+            zdata       = np.array([0,sens_val[2]])   
                   
-            # scale plot in x values
-            self.ax.set_xlim([xdata[0],xdata[-1]])
-            
+            self.line.set_data(xdata, ydata)
+            self.line.set_3d_properties(zdata)
             #self.line.set_data(np.array(self.x_data), np.array(self.y_data))
             #self.line.set_data(xdata, ydata)
 
@@ -828,7 +865,7 @@ class MonitorGUI:
             self.tprint('Did you connect the Arduino board?')
             ret = False
         #self.mainScreen()
-        #self.plotView() 
+
         return ret
         
     def commClose(self):
