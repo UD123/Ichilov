@@ -72,6 +72,57 @@ def FromSignedToUnsigned16(n):
 
 style.use("dark_background")
 
+#%%
+def imshow3d(ax, array, value_direction='z', pos=0, norm=None, cmap=None):
+    """
+    Display a 2D array as a  color-coded 2D image embedded in 3d.
+
+    The image will be in a plane perpendicular to the coordinate axis *value_direction*.
+
+    Parameters
+    ----------
+    ax : Axes3D
+        The 3D Axes to plot into.
+    array : 2D numpy array
+        The image values.
+    value_direction : {'x', 'y', 'z'}
+        The axis normal to the image plane.
+    pos : float
+        The numeric value on the *value_direction* axis at which the image plane is
+        located.
+    norm : `~matplotlib.colors.Normalize`, default: Normalize
+        The normalization method used to scale scalar data. See `imshow()`.
+    cmap : str or `~matplotlib.colors.Colormap`, default: :rc:`image.cmap`
+        The Colormap instance or registered colormap name used to map scalar data
+        to colors.
+    """
+    from matplotlib.colors import Normalize
+    if norm is None:
+        norm = Normalize()
+    colors = plt.get_cmap(cmap)(norm(array))
+
+    if value_direction == 'x':
+        nz, ny = array.shape
+        zi, yi = np.mgrid[0:nz + 1, 0:ny + 1]
+        xi = np.full_like(yi, pos)
+    elif value_direction == 'y':
+        nx, nz = array.shape
+        xm, zm  = np.linspace(-1,1,nx+1), np.linspace(-1,1,nz+1)
+        zi, xi   = np.meshgrid(zm, xm)
+        #xi, zi = np.mgrid[0:nx + 1, 0:nz + 1]
+        yi = np.full_like(zi, pos)
+    elif value_direction == 'z':
+        ny, nx  = array.shape
+        ym, xm  = np.linspace(-1,1,ny), np.linspace(-1,1,nx)
+        yi, xi  = np.meshgrid(ym, xm)
+        zi      = np.full_like(xi, pos)
+    else:
+        raise ValueError(f"Invalid value_direction: {value_direction!r}")
+    ax.plot_surface(xi, yi, zi, rstride=1, cstride=1, facecolors=colors, shade=False, zorder=10)
+
+
+#%%
+
 class MonitorGUI:
 
     def __init__(self, win, cfg = None):
@@ -308,7 +359,7 @@ class MonitorGUI:
 
         self.fig        = Figure(figsize=(10, 6), dpi=100)
         #self.fig.canvas.set_window_title('3D Scene')
-        self.z_data     = np.array([0, -1])
+        self.z_data     = np.array([1, -1])
         self.y_data     = (self.z_data)*0 
         self.x_data     = (self.z_data)*0 
         
@@ -511,7 +562,7 @@ class MonitorGUI:
         self.z_data    = np.array([0,1])
         #self.ax        = self.fig.add_subplot()
 
-        self.line,      = self.ax.plot(self.x_data, self.y_data,self.z_data, 'g-o', linewidth=2, markersize=5)
+        self.line,      = self.ax.plot(self.x_data, self.y_data,self.z_data, 'g-o', linewidth=2, markersize=5, zorder=1)
         self.stam,      = self.ax.plot(0, 0, 0, 'r-o', linewidth=0, markersize=5)
         
         self.ax.set_xlabel("X")
@@ -525,6 +576,14 @@ class MonitorGUI:
         #self.canvas= FigureCanvasTkAgg(self.fig, master=self.right_frame)
         #self.canvas.get_tk_widget().grid(row=1,column=0) #,rowspan = 4, sticky="NSEW") #,columnspan = 4,rowspan = 4)
         #self.canvas.draw()
+        nx, ny, nz = 8, 10, 5
+        #data_xy = np.arange(ny * nx).reshape(ny, nx) + 15 * np.random.random((ny, nx))
+        #data_yz = np.arange(nz * ny).reshape(nz, ny) + 10 * np.random.random((nz, ny))
+        data_zx = np.arange(nx * nz).reshape(nx, nz) + 8 * np.random.random((nx, nz))
+
+        #imshow3d(ax, data_xy)
+        #imshow3d(ax, data_yz, value_direction='x', cmap='magma')
+        imshow3d(self.ax, data_zx, value_direction='y', pos=1, cmap='gray')
                                  
     # -- Task --
     def acquireEcgRawRealTime(self, k=0):
