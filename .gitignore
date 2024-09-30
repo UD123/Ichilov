@@ -1,18 +1,4 @@
 
-PC/__pycache__/arduinoComms.cpython-37.pyc
-Tests/connect_to_bt/connect_to_bt.ino
-Tests/message_from_bt/message_from_bt.ino
-PC/__pycache__/MonitorMessage.cpython-39.pyc
-PC/__pycache__/ArduinoComms.cpython-39.pyc
-Board/ArduinoGUI/ArduinoGUI-0101.inx
-PC/__pycache__/ArduinoObjectComms.cpython-39.pyc
-PC/__pycache__/MonitorComm.cpython-39.pyc
-Board/ArduinoMain-Accel/ArduinoMain.ino
-Board/ArduinoMain-Accel/ADXL362.cpp
-Board/ArduinoMain-Accel/ADXL362.h
-
-Board/ArduinoMain-File/*
-Board/ArduinoMain-File/ADXL362.cpp
-/Tests
 *.json
 *.bak
+*.pyc
