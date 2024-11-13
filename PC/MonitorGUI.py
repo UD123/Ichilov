@@ -583,7 +583,7 @@ class MonitorGUI:
 
         #imshow3d(ax, data_xy)
         #imshow3d(ax, data_yz, value_direction='x', cmap='magma')
-        imshow3d(self.ax, data_zx, value_direction='y', pos=1, cmap='gray')
+        #imshow3d(self.ax, data_zx, value_direction='y', pos=1, cmap='plasma')
                                  
     # -- Task --
     def acquireEcgRawRealTime(self, k=0):
